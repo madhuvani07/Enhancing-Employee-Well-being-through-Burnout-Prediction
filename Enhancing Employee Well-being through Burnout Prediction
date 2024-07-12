@@ -1,0 +1,37 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load the dataset
+file_path = 'Uncleaned_employees_final_dataset (1).csv'
+data = pd.read_csv(file_path)
+
+# Handling missing values
+data['education'].fillna('Unknown', inplace=True)
+data['previous_year_rating'].fillna(data['previous_year_rating'].median(), inplace=True)
+
+# One-hot encoding for categorical variables
+data = pd.get_dummies(data, columns=['department', 'region', 'education', 'gender', 'recruitment_channel'], drop_first=True)
+
+# Define features and target
+X = data.drop(columns=['KPIs_met_more_than_80', 'employee_id'])
+y = data['KPIs_met_more_than_80']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train the model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred)
+
+print(f'Accuracy: {accuracy}')
+print(f'Classification Report:\n{report}')
+
